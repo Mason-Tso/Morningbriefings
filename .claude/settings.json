@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "(?i)^go$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"c:\\Users\\mason\\Documents\\dev\\MorningVids\\scripts\\fetch_market_data.py\"",
+            "timeout": 30,
+            "statusMessage": "Fetching overnight market data..."
+          }
+        ]
+      }
+    ]
+  }
+}
