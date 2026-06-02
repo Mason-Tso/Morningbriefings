@@ -145,8 +145,9 @@ Using the data above, write a punchy morning finance video script.
 
 Rules:
 - 80-120 words (reads in 30-45 seconds at a natural, conversational pace)
+- Start with "Morning, [day] [month] [date]." — e.g. "Morning, Tuesday June 2nd." Use the date from the market data header above.
 - Sound like a charismatic human host — warm, sharp, NOT robotic
-- Weave in 1-2 genuine jokes or witty one-liners tied to actual events in the data
+- Humor should be dry, deadpan, or sardonic — the kind of thing that makes someone smirk, not groan. No puns, no similes, no corny comparisons. Just sharp observations delivered straight.
 - Hit the biggest index moves, 1-2 news stories, and the wildest gainer or loser
 - Short punchy sentences. Flowing speech — no bullet points, no headers
 - End with a memorable zinger, challenge, or teaser

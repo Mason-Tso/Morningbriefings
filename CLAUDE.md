@@ -29,9 +29,10 @@ CLAUDE.md                # This file
 
 ## Script rules (enforced via hook output)
 
+- Opens with "Morning, [Day] [Month] [Date]." — e.g. "Morning, Tuesday June 2nd."
 - 80-120 words (30-45 seconds at natural speaking pace)
 - Charismatic human host tone — no robotic language
-- 1-2 genuine jokes tied to actual data points
+- Humor is dry and sardonic — sharp observations delivered straight. No puns, no corny comparisons.
 - Covers index moves, 1-2 news stories, wildest gainer or loser
 - Punchy flowing speech — no bullet points
 - Memorable closer every time
