@@ -2,7 +2,7 @@
 
 ## What this project does
 
-Automated morning finance video script generator. Type **"go"** in Claude Code and a live market data fetch runs automatically, injecting real data into context. Claude then writes a 30-45 second human-sounding script with jokes and market highlights.
+Automated morning TikTok news script generator. Type **"go"** in Claude Code and a live data fetch runs automatically, pulling top headline news and market context. Claude then writes a 30-45 second TikTok-style script with a hook-first format.
 
 ## How to use
 
@@ -14,7 +14,7 @@ Automated morning finance video script generator. Type **"go"** in Claude Code a
 
 ```
 scripts/
-  fetch_market_data.py   # Fetches FMP + X data, outputs context for Claude
+  fetch_market_data.py   # Fetches RSS headlines + FMP market data, outputs context for Claude
 .claude/
   settings.json          # UserPromptSubmit hook — triggers on "go"
 CLAUDE.md                # This file
@@ -24,25 +24,27 @@ CLAUDE.md                # This file
 
 | Source | What it pulls |
 |--------|--------------|
-| Financial Modeling Prep (FMP) | S&P 500, NASDAQ, DOW quotes; top news; biggest gainers & losers |
+| RSS (AP, Reuters, BBC, NPR) | Top general headlines of the morning |
+| Financial Modeling Prep (FMP) | S&P 500, NASDAQ, DOW quotes; finance headlines |
 | X (Twitter) API | Trending finance tweets (if available on current tier) |
 
 ## Script rules (enforced via hook output)
 
 - Opens with "Morning, [Day] [Month] [Date]." — e.g. "Morning, Tuesday June 2nd."
 - 80-120 words (30-45 seconds at natural speaking pace)
-- Charismatic human host tone — no robotic language
+- TikTok format: Hook → 3-4 rapid-fire stories → sharp closer
+- Hook is a single statement pulled from the biggest headline — no questions
+- Tone: direct, fast, confident — like a news anchor with a personality
 - Humor is dry and sardonic — sharp observations delivered straight. No puns, no corny comparisons.
-- Covers index moves, 1-2 news stories, wildest gainer or loser
-- Punchy flowing speech — no bullet points
-- Memorable closer every time
+- No bullet points — flowing speech throughout
 
 ## API keys
 
 Stored directly in `scripts/fetch_market_data.py`. Rotate via FMP dashboard and X developer portal if they expire.
 
-- **FMP**: Financial Modeling Prep — `stable/` API endpoints (not v3)
+- **FMP**: Financial Modeling Prep — `stable/` API endpoints
 - **X Bearer**: URL-decoded in script at runtime
+- **RSS feeds**: No key required (AP, Reuters, BBC, NPR)
 
 ## Hook behavior
 
@@ -50,6 +52,6 @@ When you type `go`, `.claude/settings.json` matches the message via `(?i)^go$` a
 
 ## Adding features
 
+- **More RSS sources**: Add entries to the `RSS_FEEDS` list in `fetch_market_data.py`
 - **Crypto prices**: FMP `stable/quote?symbol=BTC-USD` returns empty — use a dedicated crypto API
-- **More X data**: Upgrade X API tier for broader search access
 - **Save scripts**: Add `--save` flag to `fetch_market_data.py` to write output to `scripts/output/`

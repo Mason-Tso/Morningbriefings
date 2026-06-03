@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
 fetch_market_data.py
-Pulls overnight market news, movers, and index data from FMP + X.
-Output is injected into Claude Code context to generate a morning script.
+Pulls top headline news (RSS) + market context (FMP).
+Output is injected into Claude Code context to generate a TikTok morning news script.
 """
 
 import json
+import sys
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
 FMP_KEY = "dENP1cho6YaA38AuKIR36ELzqw8Hjbf4"
@@ -16,8 +18,15 @@ FMP_BASE = "https://financialmodelingprep.com/stable"
 X_BEARER_RAW = "AAAAAAAAAAAAAAAAAAAAAD9R9AEAAAAAQk%2BQDvI%2BXrTJpZBCAniVaAdTPfE%3DC7nGRdQhloPUhmIES5EfYO1F6Vul9xhbwzrnv4IAWd7N8IlXhK"
 X_BEARER = urllib.parse.unquote(X_BEARER_RAW)
 
+RSS_FEEDS = [
+    ("AP News",      "https://feeds.apnews.com/rss/apf-topnews"),
+    ("Reuters",      "https://feeds.reuters.com/reuters/topNews"),
+    ("BBC",          "http://feeds.bbci.co.uk/news/rss.xml"),
+    ("NPR",          "https://feeds.npr.org/1001/rss.xml"),
+]
 
-def fetch(url, headers=None):
+
+def fetch_json(url, headers=None):
     req = urllib.request.Request(url, headers=headers or {})
     try:
         with urllib.request.urlopen(req, timeout=10) as r:
@@ -26,135 +35,118 @@ def fetch(url, headers=None):
         return {"_error": str(e)}
 
 
-def get_news():
-    data = fetch(f"{FMP_BASE}/news/stock?limit=8&apikey={FMP_KEY}")
+def fetch_rss(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            root = ET.fromstring(r.read())
+    except Exception:
+        return []
+
+    items = []
+    ns = {"atom": "http://www.w3.org/2005/Atom"}
+    for item in root.iter("item"):
+        title = item.findtext("title", "").strip()
+        desc  = item.findtext("description", "").strip()
+        if title:
+            items.append({"title": title, "desc": desc[:120] if desc else ""})
+        if len(items) >= 4:
+            break
+    return items
+
+
+def get_headlines():
+    seen, results = set(), []
+    for source, url in RSS_FEEDS:
+        for item in fetch_rss(url):
+            t = item["title"]
+            if t not in seen:
+                seen.add(t)
+                results.append({"source": source, "title": t, "desc": item["desc"]})
+        if len(results) >= 10:
+            break
+    return results[:8]
+
+
+def get_fmp_news():
+    data = fetch_json(f"{FMP_BASE}/news/stock?limit=6&apikey={FMP_KEY}")
     if isinstance(data, list) and data:
         return [
-            {
-                "title": n.get("title", ""),
-                "symbol": n.get("symbol", ""),
-                "site": n.get("publisher") or n.get("site", ""),
-                "text": n.get("text", ""),
-            }
-            for n in data[:6]
+            {"title": n.get("title", ""), "symbol": n.get("symbol", ""), "text": n.get("text", "")[:100]}
+            for n in data[:4]
         ]
     return []
 
 
-def get_gainers_losers():
-    gainers = fetch(f"{FMP_BASE}/biggest-gainers?apikey={FMP_KEY}")
-    losers = fetch(f"{FMP_BASE}/biggest-losers?apikey={FMP_KEY}")
-
-    def clean(items, n=4):
-        if not isinstance(items, list):
-            return []
-        return [
-            {
-                "symbol": i.get("symbol"),
-                "name": i.get("name", ""),
-                "change": round(i.get("changesPercentage", 0), 1),
-                "price": i.get("price"),
-            }
-            for i in items[:n]
-        ]
-
-    return clean(gainers), clean(losers)
-
-
 def get_index(symbol):
-    data = fetch(f"{FMP_BASE}/quote?symbol={symbol}&apikey={FMP_KEY}")
+    data = fetch_json(f"{FMP_BASE}/quote?symbol={symbol}&apikey={FMP_KEY}")
     if isinstance(data, list) and data:
         q = data[0]
-        return {
-            "name": q.get("name", symbol),
-            "price": q.get("price"),
-            "change_pct": round(q.get("changePercentage", 0), 2),
-        }
+        return {"name": q.get("name", symbol), "price": q.get("price"), "change_pct": round(q.get("changePercentage", 0), 2)}
     return None
-
-
-def get_x_tweets():
-    query = urllib.parse.urlencode({
-        "query": "(stock market OR fed OR earnings OR crypto) -is:retweet lang:en",
-        "max_results": 10,
-        "tweet.fields": "public_metrics",
-    })
-    url = f"https://api.twitter.com/2/tweets/search/recent?{query}"
-    data = fetch(url, headers={"Authorization": f"Bearer {X_BEARER}"})
-    tweets = data.get("data", []) if isinstance(data, dict) else []
-    return [t.get("text", "")[:200] for t in tweets[:5]] if tweets else []
 
 
 def fmt_index(idx):
     if not idx:
         return "(unavailable)"
     sign = "+" if idx["change_pct"] >= 0 else ""
-    return f"{idx['name']}: {idx['price']:,.2f}  ({sign}{idx['change_pct']}%)"
+    return f"{idx['name']}: {idx['price']:,.2f} ({sign}{idx['change_pct']}%)"
 
 
 def main():
     now = datetime.now(timezone.utc)
     date_str = now.strftime("%A, %B %d, %Y — %H:%M UTC")
 
-    news = get_news()
-    gainers, losers = get_gainers_losers()
-    sp500 = get_index("^GSPC")
-    nasdaq = get_index("^IXIC")
-    dow = get_index("^DJI")
-    tweets = get_x_tweets()
+    headlines = get_headlines()
+    fmp_news  = get_fmp_news()
+    sp500     = get_index("^GSPC")
+    nasdaq    = get_index("^IXIC")
+    dow       = get_index("^DJI")
 
     lines = []
-    lines.append(f"=== MORNING MARKET DATA — {date_str} ===\n")
+    lines.append(f"=== MORNING NEWS DATA — {date_str} ===\n")
 
-    lines.append("--- INDICES ---")
-    lines.append(f"  S&P 500:  {fmt_index(sp500)}")
-    lines.append(f"  NASDAQ:   {fmt_index(nasdaq)}")
-    lines.append(f"  DOW:      {fmt_index(dow)}")
+    lines.append("--- TOP HEADLINES (RSS) ---")
+    if headlines:
+        for i, h in enumerate(headlines, 1):
+            lines.append(f"  {i}. [{h['source']}] {h['title']}")
+            if h["desc"]:
+                lines.append(f"     {h['desc']}")
+    else:
+        lines.append("  (unavailable)")
 
-    lines.append("\n--- TOP MARKET NEWS ---")
-    if news:
-        for i, n in enumerate(news, 1):
+    lines.append("\n--- MARKET CONTEXT ---")
+    lines.append(f"  {fmt_index(sp500)}")
+    lines.append(f"  {fmt_index(nasdaq)}")
+    lines.append(f"  {fmt_index(dow)}")
+
+    if fmp_news:
+        lines.append("\n--- FINANCE HEADLINES ---")
+        for n in fmp_news:
             sym = f" [{n['symbol']}]" if n["symbol"] else ""
-            blurb = f" — {n['text'][:100]}" if n.get("text") else ""
-            lines.append(f"  {i}. {n['title']}{sym} (via {n['site']}){blurb}")
-    else:
-        lines.append("  (unavailable)")
-
-    lines.append("\n--- TOP GAINERS ---")
-    if gainers:
-        for g in gainers:
-            lines.append(f"  {g['symbol']} ({g['name']}): +{g['change']}%  @ ${g['price']}")
-    else:
-        lines.append("  (unavailable)")
-
-    lines.append("\n--- TOP LOSERS ---")
-    if losers:
-        for l in losers:
-            lines.append(f"  {l['symbol']} ({l['name']}): {l['change']}%  @ ${l['price']}")
-    else:
-        lines.append("  (unavailable)")
-
-    if tweets:
-        lines.append("\n--- TRENDING ON X (FINANCE) ---")
-        for t in tweets:
-            lines.append(f"  • {t}")
+            lines.append(f"  • {n['title']}{sym}")
+            if n["text"]:
+                lines.append(f"    {n['text']}")
 
     lines.append("""
 === YOUR JOB, CLAUDE ===
-Using the data above, write a punchy morning finance video script.
+Write a TikTok morning news script using the headlines above.
+
+Format:
+1. HOOK — One punchy sentence that makes someone stop scrolling. Pull it from the biggest or most surprising headline. No question hooks. State something that demands attention.
+2. NEWS — Cover the 3-4 biggest stories in rapid-fire order. One to two sentences each. Facts first, then a brief dry observation if it earns one.
+3. CLOSER — One sharp line that wraps it up or teases what to watch next.
 
 Rules:
-- 80-120 words (reads in 30-45 seconds at a natural, conversational pace)
-- Start with "Morning, [day] [month] [date]." — e.g. "Morning, Tuesday June 2nd." Use the date from the market data header above.
-- Sound like a charismatic human host — warm, sharp, NOT robotic
-- Humor should be dry, deadpan, or sardonic — the kind of thing that makes someone smirk, not groan. No puns, no similes, no corny comparisons. Just sharp observations delivered straight.
-- Hit the biggest index moves, 1-2 news stories, and the wildest gainer or loser
-- Short punchy sentences. Flowing speech — no bullet points, no headers
-- End with a memorable zinger, challenge, or teaser
-- Output ONLY the final script — no labels, no preamble, no meta-commentary
+- 80-120 words total (30-45 seconds at talking pace)
+- Start with "Morning, [Day] [Month] [date]." then immediately the hook on the next beat
+- Tone: direct, fast, confident — like a news anchor who also has a personality
+- Humor: dry and sardonic only. No puns, no forced comparisons, no corny jokes.
+- No bullet points — flowing speech throughout
+- Output ONLY the final script, nothing else
 """)
 
-    print("\n".join(lines))
+    sys.stdout.buffer.write("\n".join(lines).encode("utf-8", errors="replace"))
 
 
 if __name__ == "__main__":
