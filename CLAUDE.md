@@ -30,12 +30,14 @@ CLAUDE.md                # This file
 
 ## Script rules (enforced via hook output)
 
-- Opens with "Morning, [Day] [Month] [Date]." — e.g. "Morning, Tuesday June 2nd."
-- 80-120 words (30-45 seconds at natural speaking pace)
-- TikTok format: Hook → 3-4 rapid-fire stories → sharp closer
-- Hook is a single statement pulled from the biggest headline — no questions
-- Tone: direct, fast, confident — like a news anchor with a personality
-- Humor is dry and sardonic — sharp observations delivered straight. No puns, no corny comparisons.
+- 60-75 words (under 30 seconds — shorter = more watch-through)
+- TikTok format: Hook → 2-3 rapid-fire stories → specific call to action
+- Starts directly with the hook — no date, no "Morning", no intro. First word = first punch.
+- Hook is a single declarative statement pulled from the biggest headline. No questions.
+- After the biggest story, one sentence on what it means for markets or the economy
+- Tone: professional and confident — complete sentences, like a polished news anchor
+- Humor: dry and sardonic only if it earns it. No puns, no forced comparisons.
+- Closes with a specific, direct call to action. Market is already open — frame it accordingly. Never say "stay informed."
 - No bullet points — flowing speech throughout
 
 ## API keys

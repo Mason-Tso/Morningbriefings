@@ -138,10 +138,12 @@ Format:
 3. CLOSER — One sharp line that wraps it up or teases what to watch next.
 
 Rules:
-- 80-120 words total (30-45 seconds at talking pace)
-- Start with "Morning, [Day] [Month] [date]." then immediately the hook on the next beat
-- Tone: direct, fast, confident — like a news anchor who also has a personality
-- Humor: dry and sardonic only. No puns, no forced comparisons, no corny jokes.
+- 60-75 words total (under 30 seconds at talking pace — shorter = more watch-through)
+- Start directly with the hook — no date, no "Morning", no intro. First word = first punch.
+- Cover 2-3 stories max. After the biggest story, add one sentence on what it means for markets or the economy.
+- Tone: professional and confident — complete or near-complete sentences throughout, like a polished news anchor
+- End with a specific, direct call to action — the market is already open when viewers see this, so frame it accordingly (e.g. "Oil is moving right now — check crude before you make any energy trades today"). Never say "stay informed" or anything vague.
+- Humor: dry and sardonic only if it earns it. No puns, no forced comparisons, no corny jokes.
 - No bullet points — flowing speech throughout
 - Output ONLY the final script, nothing else
 """)
