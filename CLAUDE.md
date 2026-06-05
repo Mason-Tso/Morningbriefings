@@ -26,26 +26,25 @@ CLAUDE.md                # This file
 |--------|--------------|
 | RSS (AP, Reuters, BBC, NPR) | Top general headlines of the morning |
 | Financial Modeling Prep (FMP) | S&P 500, NASDAQ, DOW quotes; finance headlines |
-| X (Twitter) API | Trending finance tweets (if available on current tier) |
 
-## Script rules (enforced via hook output)
+## Script format (strictly enforced)
 
-- 60-75 words (under 30 seconds — shorter = more watch-through)
-- TikTok format: Hook → 2-3 rapid-fire stories → specific call to action
+- **60-75 words** (under 30 seconds — shorter = more watch-through)
+- **TikTok format: Hook → 2-3 rapid-fire stories → specific call to action**
 - Starts directly with the hook — no date, no "Morning", no intro. First word = first punch.
 - Hook is a single declarative statement pulled from the biggest headline. No questions.
+- Prioritise news that moves markets — jobs data, Fed signals, major legislation, geopolitical events with economic impact
 - After the biggest story, one sentence on what it means for markets or the economy
 - Tone: professional and confident — complete sentences, like a polished news anchor
-- Humor: dry and sardonic only if it earns it. No puns, no forced comparisons.
+- Humor: dry and sardonic only if it earns it. No puns, no forced comparisons, no corny jokes.
 - Closes with a specific, direct call to action. Market is already open — frame it accordingly. Never say "stay informed."
 - No bullet points — flowing speech throughout
 
 ## API keys
 
-Stored directly in `scripts/fetch_market_data.py`. Rotate via FMP dashboard and X developer portal if they expire.
+Stored directly in `scripts/fetch_market_data.py`. Rotate via FMP dashboard if they expire.
 
 - **FMP**: Financial Modeling Prep — `stable/` API endpoints
-- **X Bearer**: URL-decoded in script at runtime
 - **RSS feeds**: No key required (AP, Reuters, BBC, NPR)
 
 ## Hook behavior
