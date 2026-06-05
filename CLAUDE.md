@@ -24,8 +24,12 @@ CLAUDE.md                # This file
 
 | Source | What it pulls |
 |--------|--------------|
-| RSS (AP, Reuters, BBC, NPR) | Top general headlines of the morning |
+| RSS — General (AP, Reuters, BBC, NPR) | Top general headlines of the morning |
+| RSS — Politics (NPR Politics, The Hill, BBC Politics) | Legislation, federal spending, policy moves |
+| RSS — Science (NPR Science, STAT News, ScienceDaily) | Biotech/science breakthroughs and catalysts |
 | Financial Modeling Prep (FMP) | S&P 500, NASDAQ, DOW quotes; finance headlines |
+
+Headlines are grouped into **General / Politics / Science** sections in the output so policy and biotech catalysts surface alongside general news.
 
 ## Script format (strictly enforced)
 
@@ -39,6 +43,7 @@ CLAUDE.md                # This file
 - Humor: dry and sardonic only if it earns it. No puns, no forced comparisons, no corny jokes.
 - Closes with a specific, direct call to action. Market is already open — frame it accordingly. Never say "stay informed."
 - No bullet points — flowing speech throughout
+- **Tie every story to a tradable sector** — after each story, name the sector(s) it moves (e.g. "that kind of federal spending commitment moves defense and corrections sectors"). The CTA names the specific sectors "in play right now." See the EXEMPLAR block in `fetch_market_data.py` for the target style.
 
 ## API keys
 
